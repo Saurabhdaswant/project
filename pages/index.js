@@ -1,9 +1,5 @@
-import Image from "next/image";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { Plus, Trash2 } from "react-feather";
 import { useState } from "react";
-
-const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
 const Item = ({ idx, item, removeItem, handleEdit }) => {
   const [showEditOptions, setShowEditOptions] = useState(false);
@@ -24,10 +20,6 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
     setList({ children: [...list.children, newItem] });
 
     handleEdit({ ...item, children: [...list.children, newItem] });
-
-    // update the main list
-    // new item should have a children key
-    // and the value shoule be our current list
   };
 
   const removeChildItem = (idx) => {
@@ -49,11 +41,6 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
 
     setList({ children: newChildren });
   };
-
-  // there should be a required for child also
-
-  // whenever we child on add button of a item
-  // we should add a new key called childern : and create a new list and add items into it
 
   return (
     <div className=" w-full">
@@ -206,7 +193,7 @@ export default function Home() {
   };
 
   return (
-    <div className={`flex h-screen bg-[#F5F5F5] ${plusJakartaSans}`}>
+    <div className={`flex h-screen bg-[#F5F5F5]`}>
       <div className=" bg-white border-2 border-gray-300 shadow-md p-8 w-full max-w-2xl m-auto rounded-md ">
         <div className="bg-gray-50 p-4 space-y-4">
           <div className="flex justify-between items-center">
