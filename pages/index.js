@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "react-feather";
+import { Plus, Save, Trash2 } from "react-feather";
 import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
 
@@ -201,7 +201,9 @@ export default function Home() {
     }
   };
 
-  console.log(schema);
+  const onSaveButtonClick = () => {
+    console.log(schema);
+  };
 
   return (
     <div className={`flex h-screen bg-[#F5F5F5]`}>
@@ -231,6 +233,14 @@ export default function Home() {
               );
             })}
           </main>
+          <div className=" flex justify-end ">
+            <button
+              onClick={() => onSaveButtonClick()}
+              className=" font-medium  bg-gradient-to-bl from-[#0FC9F2] to-[#0F85F2] px-8 py-2 shadow-2xl   rounded-lg text-lg text-white"
+            >
+              <p>Save</p>
+            </button>
+          </div>
         </div>
       </div>
     </div>
