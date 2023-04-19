@@ -1,72 +1,77 @@
 import { Plus, Trash2 } from "react-feather";
 import { v4 as uuidv4 } from "uuid";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-const Item = ({ idx, item, removeItem, handleEdit }) => {
-  const [showEditOptions, setShowEditOptions] = useState(false);
+const Item = ({ field, onRemoveFieldButtonClick, handleEditField }) => {
+  const [shouldShowEditOptions, setShouldShowEditOptions] = useState(false);
+  const [currField, setCurrField] = useState(field);
+  const [schema, setSchema] = useState({ fields: field.fields });
 
-  const [currItem, setCurrItem] = useState(item);
-  const [isRequired, setIsRequired] = useState(currItem?.isRequired);
-
-  const [list, setList] = useState({ children: item.children });
-
-  const clickHandler = (item) => {
-    const newItem = {
+  const onAddFieldButtonClick = (field) => {
+    const newField = {
       id: uuidv4(),
       name: "name",
       type: "string",
       isRequired: false,
     };
 
-    setList({ children: [...list.children, newItem] });
+    let newFields = [];
 
-    handleEdit({ ...item, children: [...list.children, newItem] });
+    if (schema.fields) {
+      newFields = [...schema.fields, newField];
+    } else {
+      newFields = [newField];
+    }
+
+    setSchema({ fields: newFields });
+
+    handleEditField({ ...field, fields: newFields });
   };
 
-  const removeChildItem = (idx) => {
-    const filterdItems = list.children.filter((_, index) => index !== idx);
+  const handleRemoveField = (id) => {
+    const filteredFields = schema.fields.filter((field) => field.id !== id);
 
-    setList({ children: [...filterdItems] });
+    setSchema({ fields: [...filteredFields] });
   };
 
-  const handleChildEdit = (currItem) => {
-    const childIndex = list.children.findIndex(
-      (child) => child.id === currItem.id
+  const handleFieldEdit = (currField) => {
+    const currFieldIndex = schema.fields.findIndex(
+      (field) => field.id === currField.id
     );
 
-    const newChildren = [...list.children];
-    newChildren[childIndex] = currItem;
+    const newFields = [...schema.fields];
+    newFields[currFieldIndex] = currField;
 
-    setList({ children: newChildren });
-    handleEdit({ ...item, children: newChildren });
+    setSchema({ fields: newFields });
+    handleEditField({ ...field, fields: newFields });
   };
 
   return (
     <div className=" w-full">
       <div
-        onMouseEnter={() => setShowEditOptions(true)}
-        onMouseLeave={() => setShowEditOptions(false)}
+        onMouseEnter={() => setShouldShowEditOptions(true)}
+        onMouseLeave={() => setShouldShowEditOptions(false)}
         className={`flex items-center justify-between  w-full `}
       >
         <div className=" hover:bg-gray-200 py-4 border-b-2  px-2   flex items-center justify-between w-11/12">
           <div className="flex items-center ">
             <input
-              value={currItem?.name}
+              value={currField?.name}
               onChange={(e) => {
-                const newItem = { ...currItem, name: e.target.value };
-                setCurrItem(newItem);
-                handleEdit(newItem);
+                const newField = { ...currField, name: e.target.value };
+                setCurrField(newField);
+                handleEditField(newField);
               }}
               className="font-semibold focus:w-32 w-28  outline-none  bg-inherit focus:bg-white rounded px-1"
             />
             <select
               id="type-select"
               className="font-semibold uppercase bg-gray-200 rounded"
-              value={currItem?.type}
+              value={currField?.type}
               onChange={(e) => {
-                const newItem = { ...currItem, type: e.target.value };
-                setCurrItem(newItem);
-                handleEdit(newItem);
+                const newField = { ...currField, type: e.target.value };
+                setCurrField(newField);
+                handleEditField(newField);
               }}
             >
               <option value="string">String</option>
@@ -76,7 +81,7 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
               <option value="array">Array</option>
             </select>
           </div>
-          {showEditOptions && (
+          {shouldShowEditOptions && (
             <div className="flex items-center gap-4 ">
               <label className="flex items-center gap-2 cursor-pointer">
                 <div className="ml-3  font-medium">Required</div>
@@ -84,38 +89,37 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
                   <input
                     type="checkbox"
                     className="sr-only"
-                    checked={isRequired}
+                    checked={currField.isRequired}
                     onChange={(e) => {
-                      const newItem = {
-                        ...currItem,
+                      const newField = {
+                        ...currField,
                         isRequired: e.target.checked,
                       };
-                      setIsRequired(e.target.checked);
-                      setCurrItem(newItem);
-                      handleEdit(newItem);
+                      setCurrField(newField);
+                      handleEditField(newField);
                     }}
                   />
                   <div
                     className={`block  w-12 h-6 rounded-full ${
-                      isRequired ? "bg-blue-500" : " bg-gray-400"
+                      currField.isRequired ? "bg-blue-500" : " bg-gray-400"
                     }`}
                   ></div>
                   <div
                     className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition ${
-                      isRequired ? "translate-x-6" : ""
+                      currField.isRequired ? "translate-x-6" : ""
                     }`}
                   ></div>
                 </div>
               </label>
-              {currItem.type === "object" && (
+              {currField.type === "object" && (
                 <button
-                  onClick={() => clickHandler(item)}
+                  onClick={() => onAddFieldButtonClick(field)}
                   className="bg-white p-1  rounded-lg"
                 >
                   <Plus className="bg-white  rounded-lg w-4 h-4" />
                 </button>
               )}
-              <button onClick={() => removeItem(idx)}>
+              <button onClick={() => onRemoveFieldButtonClick(field.id)}>
                 <Trash2 className=" w-5 h-5 " />
               </button>
             </div>
@@ -123,11 +127,11 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
         </div>
       </div>
 
-      {list?.children?.length > 0 ? (
+      {schema?.fields?.length > 0 ? (
         <div className=" p-4 pr-0 ">
-          {list?.children?.map((item, idx) => {
+          {schema?.fields?.map((field, idx) => {
             return (
-              <div key={idx}>
+              <div key={field.id}>
                 <div
                   className={` flex   
        
@@ -135,21 +139,20 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
                 >
                   <div
                     className={`  ${
-                      list?.children?.length > 1 && "border-l"
+                      schema?.fields?.length > 1 && "border-l"
                     }  mr-4 w-4 ${
-                      list?.children?.length > 1 && idx === 0 && "border-t "
+                      schema?.fields?.length > 1 && idx === 0 && "border-t "
                     }
                 ${
-                  list?.children?.length > 1 &&
-                  idx === list.children.length - 1 &&
+                  schema?.fields?.length > 1 &&
+                  idx === schema.fields.length - 1 &&
                   "border-b"
                 } `}
                   ></div>
                   <Item
-                    idx={idx}
-                    item={item}
-                    removeItem={removeChildItem}
-                    handleEdit={handleChildEdit}
+                    field={field}
+                    onRemoveFieldButtonClick={handleRemoveField}
+                    handleEditField={handleFieldEdit}
                   />
                 </div>
               </div>
@@ -162,100 +165,43 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
 };
 
 export default function Home() {
-  const [list, setList] = useState({
-    children: [
-      {
-        id: "person",
-        name: "person",
-        type: "object",
-        isRequired: true,
-        children: [
-          {
-            id: "name",
-            name: "name",
-            type: "object",
-            isRequired: true,
-            children: [
-              {
-                id: "firstName",
-                name: "firstName",
-                type: "string",
-                isRequired: true,
-              },
-              {
-                id: "lastName",
-                name: "lastName",
-                type: "string",
-                isRequired: true,
-              },
-            ],
-          },
-          {
-            id: "addName",
-            name: "addName",
-            type: "string",
-            isRequired: false,
-          },
-        ],
-      },
-      {
-        id: "order",
-        name: "order",
-        type: "string",
-        isRequired: true,
-      },
-      {
-        id: "class",
-        name: "class",
-        type: "boolean",
-        isRequired: true,
-      },
-      {
-        id: "general",
-        name: "general",
-        type: "boolean",
-        isRequired: true,
-      },
-    ],
+  const [schema, setSchema] = useState({
+    fields: [],
   });
-
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     setList(JSON.parse(localStorage.getItem("tree")));
-  //   }
-  // }, []);
-
-  const clickHandler = () => {
-    const newItem = {
+  const onAddFieldButtonClick = () => {
+    const newField = {
+      id: uuidv4(),
       name: "name",
       type: "string",
       isRequired: false,
     };
 
-    setList({ children: [...list.children, newItem] });
+    setSchema({ fields: [...schema.fields, newField] });
   };
 
-  const removeItem = (idx) => {
-    const filterdItems = list.children.filter((_, index) => index !== idx);
+  const onRemoveFieldButtonClick = (id) => {
+    const filteredFields = schema.fields.filter((field) => field.id !== id);
 
-    setList({ children: [...filterdItems] });
+    setSchema({ fields: [...filteredFields] });
   };
 
-  const handleEdit = (currItem) => {
-    const itemIndex = list.children.findIndex(
-      (habit, _) => habit.id === currItem.id
+  const handleEditField = (editedField) => {
+    const editedFieldIndex = schema.fields.findIndex(
+      (field, _) => field.id === editedField.id
     );
 
-    list.children[itemIndex] = currItem;
-    setList({ children: [...list.children] });
+    schema.fields[editedFieldIndex] = editedField;
+    setSchema({ fields: [...schema.fields] });
 
     if (typeof window !== "undefined") {
       localStorage.setItem(
         "tree",
-        JSON.stringify({ children: [...list.children] })
+        JSON.stringify({ fields: [...schema.fields] })
       );
     }
   };
+
+  console.log(schema);
 
   return (
     <div className={`flex h-screen bg-[#F5F5F5]`}>
@@ -264,23 +210,22 @@ export default function Home() {
           <div className="flex justify-between items-center">
             <p className="font-bold text-gray-600 ">Feild name and type</p>
             <button
-              onClick={() => clickHandler()}
+              onClick={() => onAddFieldButtonClick()}
               className="bg-white p-1 rounded-lg"
             >
               <Plus className="bg-white  rounded-lg w-5 h-5" />
             </button>
           </div>
           <main>
-            {list?.children?.map((item, idx) => {
+            {schema?.fields?.map((field, idx) => {
               return (
-                <div key={idx} className="flex  items-start  gap-4  ">
+                <div key={field.id} className="flex  items-start  gap-4  ">
                   <p className="text-gray-400 py-4  ">{idx + 1}.</p>
 
                   <Item
-                    idx={idx}
-                    item={item}
-                    removeItem={removeItem}
-                    handleEdit={handleEdit}
+                    field={field}
+                    onRemoveFieldButtonClick={onRemoveFieldButtonClick}
+                    handleEditField={handleEditField}
                   />
                 </div>
               );
