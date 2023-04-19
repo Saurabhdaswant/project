@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "react-feather";
-import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
 
 const Item = ({ idx, item, removeItem, handleEdit }) => {
   const [showEditOptions, setShowEditOptions] = useState(false);
@@ -7,7 +8,7 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
   const [currItem, setCurrItem] = useState(item);
   const [isRequired, setIsRequired] = useState(currItem?.isRequired);
 
-  const [list, setList] = useState({ children: [] });
+  const [list, setList] = useState({ children: item.children });
 
   const clickHandler = (item) => {
     const newItem = {
@@ -34,12 +35,10 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
     );
 
     const newChildren = [...list.children];
-    newChildren[childIndex] = {
-      ...newChildren[childIndex],
-      isRequired: isRequired,
-    };
+    newChildren[childIndex] = currItem;
 
     setList({ children: newChildren });
+    handleEdit({ ...item, children: newChildren });
   };
 
   return (
@@ -49,7 +48,7 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
         onMouseLeave={() => setShowEditOptions(false)}
         className={`flex items-center justify-between  w-full `}
       >
-        <div className=" hover:bg-gray-200 py-1 border-b-2    flex items-center justify-between w-11/12">
+        <div className=" hover:bg-gray-200 py-4 border-b-2  px-2   flex items-center justify-between w-11/12">
           <div className="flex items-center ">
             <input
               value={currItem?.name}
@@ -124,9 +123,9 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
         </div>
       </div>
 
-      {list?.children.length > 0 ? (
-        <div className=" p-4 ">
-          {list.children.map((item, idx) => {
+      {list?.children?.length > 0 ? (
+        <div className=" p-4 pr-0 ">
+          {list?.children?.map((item, idx) => {
             return (
               <div key={idx}>
                 <div
@@ -164,8 +163,67 @@ const Item = ({ idx, item, removeItem, handleEdit }) => {
 
 export default function Home() {
   const [list, setList] = useState({
-    children: [],
+    children: [
+      {
+        id: "person",
+        name: "person",
+        type: "object",
+        isRequired: true,
+        children: [
+          {
+            id: "name",
+            name: "name",
+            type: "object",
+            isRequired: true,
+            children: [
+              {
+                id: "firstName",
+                name: "firstName",
+                type: "string",
+                isRequired: true,
+              },
+              {
+                id: "lastName",
+                name: "lastName",
+                type: "string",
+                isRequired: true,
+              },
+            ],
+          },
+          {
+            id: "addName",
+            name: "addName",
+            type: "string",
+            isRequired: false,
+          },
+        ],
+      },
+      {
+        id: "order",
+        name: "order",
+        type: "string",
+        isRequired: true,
+      },
+      {
+        id: "class",
+        name: "class",
+        type: "boolean",
+        isRequired: true,
+      },
+      {
+        id: "general",
+        name: "general",
+        type: "boolean",
+        isRequired: true,
+      },
+    ],
   });
+
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     setList(JSON.parse(localStorage.getItem("tree")));
+  //   }
+  // }, []);
 
   const clickHandler = () => {
     const newItem = {
@@ -190,6 +248,13 @@ export default function Home() {
 
     list.children[itemIndex] = currItem;
     setList({ children: [...list.children] });
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "tree",
+        JSON.stringify({ children: [...list.children] })
+      );
+    }
   };
 
   return (
@@ -206,10 +271,10 @@ export default function Home() {
             </button>
           </div>
           <main>
-            {list.children.map((item, idx) => {
+            {list?.children?.map((item, idx) => {
               return (
-                <div key={idx} className="flex    ">
-                  <p className="text-gray-400 py-2 ">{idx + 1}.</p>
+                <div key={idx} className="flex  items-start  gap-4  ">
+                  <p className="text-gray-400 py-4  ">{idx + 1}.</p>
 
                   <Item
                     idx={idx}
