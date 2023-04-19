@@ -233,14 +233,16 @@ export default function Home() {
               );
             })}
           </main>
-          <div className=" flex justify-end ">
-            <button
-              onClick={() => onSaveButtonClick()}
-              className=" font-medium  bg-gradient-to-bl from-[#0FC9F2] to-[#0F85F2] px-8 py-2 shadow-2xl   rounded-lg text-lg text-white"
-            >
-              <p>Save</p>
-            </button>
-          </div>
+          {schema?.fields?.length > 0 && (
+            <div className=" flex justify-end ">
+              <button
+                onClick={() => onSaveButtonClick()}
+                className=" font-medium  bg-gradient-to-bl from-[#0FC9F2] to-[#0F85F2] px-8 py-2 shadow-2xl   rounded-lg text-lg text-white"
+              >
+                <p>Save</p>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
